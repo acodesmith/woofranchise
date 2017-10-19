@@ -1,0 +1,19 @@
+{
+    "name": "acodesmith/woofranchise",
+    "description": "WordPress WooCommerce plugin for managing franchise locations.",
+    "type": "wordpress-plugin",
+    "authors": [
+        {
+            "name": "acodesmith",
+            "email": "adam@acodesmith.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "WooFranchise\\": "src/"
+        },
+        "files": [
+        ]
+    },
+    "require": {}
+}

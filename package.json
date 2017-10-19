@@ -1,0 +1,27 @@
+{
+  "name": "woofranchise",
+  "version": "0.0.1",
+  "description": "WordPress WooCommerce plugin for managing franchise locations.",
+  "main": "index.js",
+  "repository": "git@github.com:acodesmith/cater-waiter.git",
+  "author": "acodesmith <adam@acodesmith.com>",
+  "private": true,
+  "devDependencies": {
+    "babel-core": "^6.23.1",
+    "babel-eslint": "^7.1.1",
+    "babel-loader": "^6.3.2",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-es2015": "^6.22.0",
+    "babel-preset-stage-2": "^6.22.0",
+    "babel-runtime": "^6.23.0",
+    "css-loader": "^0.26.2",
+    "eslint": "^3.16.1",
+    "eslint-loader": "^1.6.3",
+    "extract-text-webpack-plugin": "^2.0.0",
+    "node-sass": "^4.5.0",
+    "sass-loader": "^6.0.2",
+    "scss-loader": "0.0.1",
+    "style-loader": "^0.13.2",
+    "webpack": "^2.2.1"
+  }
+}
