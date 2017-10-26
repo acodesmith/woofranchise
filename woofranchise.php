@@ -7,14 +7,14 @@
  * registers the activation and deactivation functions, and defines a function
  * that starts the plugin.
  *
- * @link              https://github.com/acodesmith/cater-waiter
+ * @link              https://github.com/acodesmith/woofranchise
  * @since             0.0.1
- * @package           ACODESMITH\cater-waiter
+ * @package           ACODESMITH\woofranchise
  *
  * @wordpress-plugin
- * Plugin Name:       Cater Waiter
- * Plugin URI:        https://github.com/acodesmith/cater-waiter
- * Description:       WooCommerce for Online Catering Orders
+ * Plugin Name:       WooFranchise
+ * Plugin URI:        https://github.com/acodesmith/woofranchise
+ * Description:       WordPress WooCommerce plugin for managing franchise locations.
  * Version:           0.0.1
  * Author:            ACODESMITH
  * Author URI:        https://acodesmith.com/
