@@ -10,10 +10,13 @@ class FranchiseTaxRates
 {
     public function __construct()
     {
-        //add_filter( 'woocommerce_cart_calculate_fees', [ $this, 'add_tax' ], 10, 1 );
-        add_filter( 'woocommerce_product_get_tax_class', [ $this, 'add_tax' ], 10, 1 );
         add_filter( 'save_post', [ $this, 'sync_tax_rate' ], 1000, 1 );
+        add_filter( 'delete_post', [ $this, 'delete_synced_tax_rate' ], 10, 1 );
+
+        add_filter( 'woocommerce_product_get_tax_class', [ $this, 'add_tax' ], 10, 1 );
         add_filter( 'woocommerce_countries_ex_tax_or_vat', [ $this, 'tax_label' ], 10, 1 );
+        add_filter( 'woocommerce_get_sections_tax', [ $this, 'hide_tax_classes' ], 10, 1 );
+
         add_filter( 'wp_footer', [ $this, 'tax_label' ] );
     }
 
@@ -27,6 +30,33 @@ class FranchiseTaxRates
         return 'big-pappa-pancakes';
     }
 
+    /**
+     * Hide our custom tax rate classes on the WooCommerce tax setting tab.
+     *
+     * @param $sections
+     * @return array
+     */
+    public function hide_tax_classes($sections)
+    {
+        $query = new \WP_Query([
+            'post_type'     => FranchiseBootstrap::CPT_NAMESPACE,
+            'post_status'   => ['publish', 'pending', 'draft', 'auto-draft', 'future', 'private', 'inherit', 'trash'],
+            'posts_per_page'=> -1
+        ]);
+
+        if( $query->have_posts() && ! WP_DEBUG )
+            return array_diff_key( $sections, array_flip( array_map( function($post) {
+                /** @var \WP_Post $post */
+                return $post->post_name;
+            }, $query->posts ) ) );
+
+        return $sections;
+    }
+
+    /**
+     * Hack to not display the tax rate name, but just the word tax
+     * @todo make better
+     */
     public function tax_label(  )
     {
         $label = __("Tax", 'woofranchise');
@@ -44,9 +74,39 @@ class FranchiseTaxRates
         </style>";
     }
 
+    /**
+     * @param $post_id
+     */
+    public function delete_synced_tax_rate($post_id)
+    {
+        $post = get_post( $post_id );
+
+        // You shall not pass!
+        if( $post->post_type !== FranchiseBootstrap::CPT_NAMESPACE )
+            return;
+
+        $tax_rate_id = self::get_tax_rate_by_name( $post->post_name );
+
+        // Delete tax rate if no stored value and existing record.
+        if ( ! empty( $tax_rate_id )  ) {
+            \WC_Tax::_delete_tax_rate($tax_rate_id);
+        }
+    }
+
+    /**
+     * Insert tax class in the WooCommerce tax tables.
+     * Update class if it is already set.
+     * Delete tax class if the franchise tax rate is not set.
+     *
+     * @param $post_id
+     */
     public function sync_tax_rate($post_id)
     {
         $post = get_post( $post_id );
+
+        // You shall not pass!
+        if( empty( $post ) || ( isset( $post->post_title ) && $post->post_title == 'Auto Draft' ) )
+            return;
 
         // You shall not pass!
         if( $post->post_type !== FranchiseBootstrap::CPT_NAMESPACE )
@@ -88,6 +148,10 @@ class FranchiseTaxRates
 
         $tax_rate_meta_data = array_map( 'array_shift', $tax_rate_meta_data );
 
+        // You shall not pass!
+        if( empty( $tax_rate_meta_data['wf_tax_rate'] ) )
+            return;
+
         // Build array to sync to DB
         $tax_rate_data = [
             'tax_rate_country'  => $tax_rate_meta_data['wf_country'],
@@ -120,6 +184,10 @@ class FranchiseTaxRates
         }
     }
 
+    /**
+     * @param $tax_rate_name
+     * @return null|string
+     */
     public static function get_tax_rate_by_name($tax_rate_name)
     {
         global $wpdb;

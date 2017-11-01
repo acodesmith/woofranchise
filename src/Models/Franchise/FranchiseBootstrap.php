@@ -44,7 +44,7 @@ class FranchiseBootstrap
             'capability_type' 	=> 'post',
             'has_archive' 		=> false,
             'hierarchical' 		=> true,
-            'rewrite' 			=> ['slug' => 'beer', 'with_front' => false ],
+            'rewrite' 			=> ['slug' => 'franchise', 'with_front' => false ],
             'supports' 			=> ['title','thumbnail',],
             'menu_position' 	=> 20,
             'menu_icon' 		=> 'dashicons-admin-multisite',

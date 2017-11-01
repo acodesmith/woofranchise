@@ -35,7 +35,7 @@ class Bootstrap
         new Models\Franchise\FranchiseMetaBoxes();
 
         //Customize the WordPress Admin
-        new Admin\WC_WooFranchise_Settings();
+        //new Admin\WC_WooFranchise_Settings();
 
         //Customize Core or Third Party Plugins
         new Modules\WooCommerce\FranchiseTaxRates();

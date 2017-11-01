@@ -122,7 +122,52 @@ class FranchiseMetaBoxes extends MetaBoxes
                         'type'      => 'text',
                     ],
                 ],
-            ]
+            ],
+            [
+            'id'        => self::META_KEY_PREFIX . 'franchise_hours',
+            'name'      => __( 'Franchise Hours', 'woofranchise' ),
+            'screen'    => FranchiseBootstrap::CPT_NAMESPACE,
+            'priority'  => 'high',
+            'callback'  => function(){
+                $this->render( self::META_KEY_PREFIX . 'franchise_hours' );
+            },
+            'fields'    => [
+                [
+                    'id'        => self::META_KEY_PREFIX . 'pickup_time_start',
+                    'meta_key'  => self::META_KEY_PREFIX . 'pickup_time_start',
+                    'name'      => 'Start of Delivery Time',
+                    'type'      => 'time',
+                    'attributes'=> [
+                        'pattern'=>"[0-9]{2}:[0-9]{2}",
+                    ]
+                ],[
+                    'id'        => self::META_KEY_PREFIX . 'pickup_time_end',
+                    'meta_key'  => self::META_KEY_PREFIX . 'pickup_time_end',
+                    'name'      => 'End of Delivery Time',
+                    'type'      => 'time',
+                    'attributes'=> [
+                        'pattern'=>"[0-9]{2}:[0-9]{2}",
+                    ]
+                ],
+                [
+                    'id'        => self::META_KEY_PREFIX . 'delivery_time_start',
+                    'meta_key'  => self::META_KEY_PREFIX . 'delivery_time_start',
+                    'name'      => 'Start of Delivery Time',
+                    'type'      => 'time',
+                    'attributes'=> [
+                        'pattern'=>"[0-9]{2}:[0-9]{2}",
+                    ]
+                ],[
+                    'id'        => self::META_KEY_PREFIX . 'delivery_time_end',
+                    'meta_key'  => self::META_KEY_PREFIX . 'delivery_time_end',
+                    'name'      => 'End of Delivery Time',
+                    'type'      => 'time',
+                    'attributes'=> [
+                        'pattern'=>"[0-9]{2}:[0-9]{2}",
+                    ]
+                ],
+            ],
+        ],
         ] );
     }
 }

@@ -18,6 +18,7 @@ foreach( $field['attributes'] as $name => $value )
 <div class="wf_meta_box_field wf_meta_box_field_<?= $field['type']; ?>">
     <?php switch( $field['type'] ):
         case 'text':
+        case 'time':
         case 'number': ?>
                 <label for="<?= $field['id']; ?>"><?= $field['name']; ?></label>
                 <input
