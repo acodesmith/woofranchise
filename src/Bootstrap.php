@@ -3,6 +3,7 @@
 
 namespace WooFranchise;
 
+use WooFranchise\Admin\WC_PluginSettings;
 use WooFranchise\Models\Franchise\Franchise;
 
 class Bootstrap
@@ -35,7 +36,7 @@ class Bootstrap
         new Models\Franchise\FranchiseMetaBoxes();
 
         //Customize the WordPress Admin
-        //new Admin\WC_WooFranchise_Settings();
+        new WC_PluginSettings();
 
         //Customize Core or Third Party Plugins
         new Modules\WooCommerce\FranchiseTaxRates();
