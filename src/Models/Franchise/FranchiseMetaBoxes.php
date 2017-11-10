@@ -135,7 +135,7 @@ class FranchiseMetaBoxes extends MetaBoxes
                 [
                     'id'        => self::META_KEY_PREFIX . 'pickup_time_start',
                     'meta_key'  => self::META_KEY_PREFIX . 'pickup_time_start',
-                    'name'      => 'Start of Delivery Time',
+                    'name'      => 'Start of Pickup Time',
                     'type'      => 'time',
                     'attributes'=> [
                         'pattern'=>"[0-9]{2}:[0-9]{2}",
@@ -143,7 +143,7 @@ class FranchiseMetaBoxes extends MetaBoxes
                 ],[
                     'id'        => self::META_KEY_PREFIX . 'pickup_time_end',
                     'meta_key'  => self::META_KEY_PREFIX . 'pickup_time_end',
-                    'name'      => 'End of Delivery Time',
+                    'name'      => 'End of Pickup Time',
                     'type'      => 'time',
                     'attributes'=> [
                         'pattern'=>"[0-9]{2}:[0-9]{2}",
