@@ -40,5 +40,6 @@ class Bootstrap
 
         //Customize Core or Third Party Plugins
         new Modules\WooCommerce\FranchiseTaxRates();
+        new Modules\CaterWaiter\Locations();
     }
 }
