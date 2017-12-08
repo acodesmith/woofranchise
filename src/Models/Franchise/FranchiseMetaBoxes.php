@@ -109,7 +109,8 @@ class FranchiseMetaBoxes extends MetaBoxes
                         'id'        => self::META_KEY_PREFIX . 'state',
                         'meta_key'  => self::META_KEY_PREFIX . 'state',
                         'name'      => 'State (Two Letter Abbreviation)',
-                        'type'      => 'text',
+                        'type'      => 'select',
+		                'options'   => include( WOOFRANCHISE_PLUGIN_PATH . 'scaffolding/states.php' ),
                     ],[
                         'id'        => self::META_KEY_PREFIX . 'zip',
                         'meta_key'  => self::META_KEY_PREFIX . 'zip',
@@ -119,7 +120,12 @@ class FranchiseMetaBoxes extends MetaBoxes
                         'id'        => self::META_KEY_PREFIX . 'country',
                         'meta_key'  => self::META_KEY_PREFIX . 'country',
                         'name'      => 'Country (Two Letter Abbreviation)',
-                        'type'      => 'text',
+                        'type'      => 'input',
+                        'options'   => include( WOOFRANCHISE_PLUGIN_PATH . 'scaffolding/countries.php' ),
+		                'default'   => 'US', //Currently hard coding US as only supported Country
+		                'attributes'=> [
+			                'readonly'  => 'readonly',
+		                ]
                     ],
                 ],
             ],

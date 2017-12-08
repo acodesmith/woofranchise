@@ -30,5 +30,23 @@ foreach( $field['attributes'] as $name => $value )
                     <?= implode( ' ', $attr_str ); ?>
                 >
             <?php break;
+	    case 'select': ?>
+		    <label for="<?= $field['id']; ?>"><?= $field['name']; ?></label>
+		    <select
+				    id="<?= $field['id']; ?>"
+				    name="<?= $field['meta_key']; ?>"
+				    class="regular-text regular-select"
+			    <?= implode( ' ', $attr_str ); ?>
+		    >
+			    <?php if( ! empty( $field['options'] ) ):
+				        foreach( $field['options'] as $value => $option ): ?>
+					        <option
+						        value="<?= $value; ?>"
+						        <?= ! empty( $saved_value ) && $value == $saved_value ? 'selected="selected"' : null; ?>
+					        ><?= $option; ?></option>
+				        <?php endforeach;;
+			        endif; ?>
+		    </select>
+	    	<?php break;
     endswitch; ?>
 </div>
