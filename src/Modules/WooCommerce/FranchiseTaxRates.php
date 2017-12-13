@@ -26,6 +26,8 @@ class FranchiseTaxRates
      */
     public function add_tax($class)
     {
+    	error_log( json_encode( \WC()->session ) );
+
         //@todo check the franchise post_name to select tax rate.
         return 'big-pappa-pancakes';
     }
