@@ -18,6 +18,7 @@ class FranchiseBootstrap
     {
         add_filter( 'init', [ $this, 'run' ] );
         add_filter( 'save_post', [ $this, 'geolocation' ] );
+	    add_action('pmxi_saved_post', [ $this, 'geolocation' ] );
     }
 
     public function run()
