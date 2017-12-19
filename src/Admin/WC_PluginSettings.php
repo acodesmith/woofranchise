@@ -29,7 +29,7 @@ class WC_PluginSettings
      */
     public function add_section($sections)
     {
-        $sections['wc_woofranchise'] = __( 'WooFranchise', 'woofranchise' );
+        $sections['wc_woofranchise'] = __( 'Franchise', 'woofranchise' );
 
         return $sections;
     }

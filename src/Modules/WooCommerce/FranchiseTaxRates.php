@@ -4,6 +4,7 @@
 namespace WooFranchise\Modules\WooCommerce;
 
 
+use CaterWaiter\Admin\Order;
 use WooFranchise\Models\Franchise\FranchiseBootstrap;
 
 class FranchiseTaxRates
@@ -14,6 +15,7 @@ class FranchiseTaxRates
         add_filter( 'delete_post', [ $this, 'delete_synced_tax_rate' ], 10, 1 );
 
         add_filter( 'woocommerce_product_get_tax_class', [ $this, 'add_tax' ], 10, 1 );
+        add_filter( 'woocommerce_product_variation_get_tax_class', [ $this, 'add_tax' ], 10, 1 );
         add_filter( 'woocommerce_countries_ex_tax_or_vat', [ $this, 'tax_label' ], 10, 1 );
         add_filter( 'woocommerce_get_sections_tax', [ $this, 'hide_tax_classes' ], 10, 1 );
 
@@ -26,10 +28,16 @@ class FranchiseTaxRates
      */
     public function add_tax($class)
     {
-    	error_log( json_encode( \WC()->session ) );
+	    $location_id = \WC()->session->get( Order::TAX_LOCATION_ID );
 
-        //@todo check the franchise post_name to select tax rate.
-        return 'big-pappa-pancakes';
+	    if ( ! empty( $location_id ) ) {
+	    	if ( $location = get_post( $location_id ) ) {
+	    		error_log($location->post_name);
+			    return $location->post_name;
+		    }
+	    }
+
+        return $class;
     }
 
     /**
