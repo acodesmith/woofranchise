@@ -112,7 +112,6 @@ class FranchiseTaxRates
 	    $woocommerce_tax_classes = explode( PHP_EOL, get_option( 'woocommerce_tax_classes' ) );
 
 	    if ( $key = array_search( $post->post_name, $woocommerce_tax_classes ) ) {
-			error_log("UNSET SHOULD WORK");
 		    unset( $woocommerce_tax_classes[ $key ] );
 
 		    update_option( 'woocommerce_tax_classes', implode( "\n", $woocommerce_tax_classes ) );
@@ -151,12 +150,6 @@ class FranchiseTaxRates
 
         // Tax Rate Classes
         $tax_rate_classes = explode(PHP_EOL, get_option( 'woocommerce_tax_classes' ) );
-
-	    // Delete the item from site option woocommerce_tax_classes
-	    if ( ( $key = array_search($post->post_name, $tax_rate_classes ) ) !== false ) {
-		    unset( $tax_rate_classes[ $key ] );
-		    update_option( 'woocommerce_tax_classes', implode( "\n", $tax_rate_classes ) );
-	    }
 
 	    // Extract Post Meta
 	    $tax_rate_meta_data = array_intersect_key( $post_meta,
@@ -205,11 +198,12 @@ class FranchiseTaxRates
         if ( ! empty( $tax_rate_meta_data['wf_zip'] ) ) {
             $postcode = array_map( 'wc_clean', [ $tax_rate_meta_data['wf_zip'] ] );
             $postcode = array_map( 'wc_normalize_postcode', $postcode );
-            \WC_Tax::_update_tax_rate_postcodes( $tax_rate_id, $postcode );
+            \WC_Tax::_update_tax_rate_postcodes( $tax_rate_id, implode(';', $postcode) );
         }
 
         if ( ! empty( $tax_rate_meta_data['wf_city'] ) ) {
-            \WC_Tax::_update_tax_rate_cities( $tax_rate_id, array_map( 'wc_clean', [ $tax_rate_meta_data['wf_city'] ] ) );
+        	$city = array_map( 'wc_clean', [ $tax_rate_meta_data['wf_city'] ] );
+            \WC_Tax::_update_tax_rate_cities( $tax_rate_id, reset($city) );
         }
     }
 
