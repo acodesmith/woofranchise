@@ -12,6 +12,7 @@ class FranchiseTaxRates
     public function __construct()
     {
         add_filter( 'save_post', [ $this, 'sync_tax_rate' ], 1000, 1 );
+	    add_action( 'pmxi_saved_post', [ $this, 'sync_tax_rate' ], 1000, 1 );
         add_filter( 'delete_post', [ $this, 'delete_synced_tax_rate' ], 10, 1 );
 
         add_filter( 'woocommerce_product_get_tax_class', [ $this, 'add_tax' ], 10, 1 );
@@ -28,12 +29,15 @@ class FranchiseTaxRates
      */
     public function add_tax($class)
     {
-	    $location_id = \WC()->session->get( Order::TAX_LOCATION_ID );
+    	if( \WC()->session ) {
+		    $location_id = \WC()->session->get( Order::TAX_LOCATION_ID );
 
-	    if ( ! empty( $location_id ) ) {
-	    	if ( $location = get_post( $location_id ) ) {
-	    		error_log($location->post_name);
-			    return $location->post_name;
+		    if ( ! empty( $location_id ) ) {
+			    if ( $location = get_post( $location_id ) ) {
+				    error_log( $location->post_name );
+
+				    return $location->post_name;
+			    }
 		    }
 	    }
 
@@ -92,15 +96,24 @@ class FranchiseTaxRates
         $post = get_post( $post_id );
 
         // You shall not pass!
-        if( $post->post_type !== FranchiseBootstrap::CPT_NAMESPACE )
+        if ( $post->post_type !== FranchiseBootstrap::CPT_NAMESPACE )
             return;
+
+        // Delete the item from site option woocommerce_tax_classes
+	    $woocommerce_tax_classes = explode(PHP_EOL, get_option( 'woocommerce_tax_classes' ) );
+
+	    if ( ( $key = array_search($post->post_name, $woocommerce_tax_classes ) ) !== false) {
+
+		    unset( $woocommerce_tax_classes[ $key ] );
+
+		    update_option( 'woocommerce_tax_classes', implode( "\n", $woocommerce_tax_classes ) );
+	    }
 
         $tax_rate_id = self::get_tax_rate_by_name( $post->post_name );
 
         // Delete tax rate if no stored value and existing record.
-        if ( ! empty( $tax_rate_id )  ) {
-            \WC_Tax::_delete_tax_rate($tax_rate_id);
-        }
+        if ( ! empty( $tax_rate_id )  )
+	        \WC_Tax::_delete_tax_rate($tax_rate_id);
     }
 
     /**
@@ -112,10 +125,11 @@ class FranchiseTaxRates
      */
     public function sync_tax_rate($post_id)
     {
+    	/** @var \WP_Post $post */
         $post = get_post( $post_id );
 
         // You shall not pass!
-        if( empty( $post ) || ( isset( $post->post_title ) && $post->post_title == 'Auto Draft' ) )
+        if( empty( $post ) || ( isset( $post->post_title ) && $post->post_title == 'Auto Draft' ) || $post->post_status == 'trash' )
             return;
 
         // You shall not pass!
@@ -128,14 +142,15 @@ class FranchiseTaxRates
         // Tax Rate Classes
         $tax_rate_classes = explode(PHP_EOL, get_option( 'woocommerce_tax_classes' ) );
 
+	    // Delete the item from site option woocommerce_tax_classes
+	    if ( ( $key = array_search($post->post_name, $tax_rate_classes ) ) !== false ) {
+		    unset( $tax_rate_classes[ $key ] );
+		    update_option( 'woocommerce_tax_classes', implode( "\n", $tax_rate_classes ) );
+	    }
+
         // Delete tax rate if no stored value and existing record.
         if ( ! empty( $tax_rate_id ) && empty( $_POST['wf_tax_rate'] ) ) {
             \WC_Tax::_delete_tax_rate( $tax_rate_id );
-
-            if (($key = array_search($post->post_name, $tax_rate_classes)) !== false) {
-                unset($tax_rate_classes[$key]);
-                update_option( 'woocommerce_tax_classes', implode( "\n", $tax_rate_classes ) );
-            }
 
             // You shall not pass!
             return;
