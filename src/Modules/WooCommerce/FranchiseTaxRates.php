@@ -12,8 +12,9 @@ class FranchiseTaxRates
     public function __construct()
     {
         add_filter( 'save_post', [ $this, 'sync_tax_rate' ], 1000, 1 );
+        add_filter( 'untrash_post', [ $this, 'sync_tax_rate' ], 1000, 1 );
 	    add_action( 'pmxi_saved_post', [ $this, 'sync_tax_rate' ], 1000, 1 );
-        add_filter( 'delete_post', [ $this, 'delete_synced_tax_rate' ], 10, 1 );
+        add_filter( 'wp_trash_post', [ $this, 'delete_synced_tax_rate' ], 10, 1 );
 
         add_filter( 'woocommerce_product_get_tax_class', [ $this, 'add_tax' ], 10, 1 );
         add_filter( 'woocommerce_product_variation_get_tax_class', [ $this, 'add_tax' ], 10, 1 );
@@ -21,6 +22,13 @@ class FranchiseTaxRates
         add_filter( 'woocommerce_get_sections_tax', [ $this, 'hide_tax_classes' ], 10, 1 );
 
         add_filter( 'wp_footer', [ $this, 'tax_label' ] );
+
+        //add_action( 'admin_init', [ $this, 'debug' ] );
+    }
+
+    public function debug() {
+
+    	self::sync_tax_rate( $_GET['post'] );
     }
 
     /**
@@ -93,27 +101,29 @@ class FranchiseTaxRates
      */
     public function delete_synced_tax_rate($post_id)
     {
-        $post = get_post( $post_id );
+	    $post = get_post( $post_id );
 
-        // You shall not pass!
-        if ( $post->post_type !== FranchiseBootstrap::CPT_NAMESPACE )
-            return;
+	    // You shall not pass!
+	    if ( $post->post_type !== FranchiseBootstrap::CPT_NAMESPACE ) {
+		    return;
+	    }
 
-        // Delete the item from site option woocommerce_tax_classes
-	    $woocommerce_tax_classes = explode(PHP_EOL, get_option( 'woocommerce_tax_classes' ) );
+	    // Delete the item from site option woocommerce_tax_classes
+	    $woocommerce_tax_classes = explode( PHP_EOL, get_option( 'woocommerce_tax_classes' ) );
 
-	    if ( ( $key = array_search($post->post_name, $woocommerce_tax_classes ) ) !== false) {
-
+	    if ( $key = array_search( $post->post_name, $woocommerce_tax_classes ) ) {
+			error_log("UNSET SHOULD WORK");
 		    unset( $woocommerce_tax_classes[ $key ] );
 
 		    update_option( 'woocommerce_tax_classes', implode( "\n", $woocommerce_tax_classes ) );
 	    }
 
-        $tax_rate_id = self::get_tax_rate_by_name( $post->post_name );
+	    $tax_rate_id = self::get_tax_rate_by_name( $post->post_name );
 
-        // Delete tax rate if no stored value and existing record.
-        if ( ! empty( $tax_rate_id )  )
-	        \WC_Tax::_delete_tax_rate($tax_rate_id);
+	    // Delete tax rate if no stored value and existing record.
+	    if ( ! empty( $tax_rate_id ) ) {
+		    \WC_Tax::_delete_tax_rate( $tax_rate_id );
+	    }
     }
 
     /**
@@ -148,13 +158,22 @@ class FranchiseTaxRates
 		    update_option( 'woocommerce_tax_classes', implode( "\n", $tax_rate_classes ) );
 	    }
 
-        // Delete tax rate if no stored value and existing record.
-        if ( ! empty( $tax_rate_id ) && empty( $_POST['wf_tax_rate'] ) ) {
-            \WC_Tax::_delete_tax_rate( $tax_rate_id );
+	    // Extract Post Meta
+	    $tax_rate_meta_data = array_intersect_key( $post_meta,
+		    [
+			    'wf_country'        => 1,
+			    'wf_state'          => 1,
+			    'wf_tax_rate'       => 1,
+			    'wf_zip'            => 1,
+			    'wf_city'           => 1,
+		    ]
+	    );
 
-            // You shall not pass!
-            return;
-        }
+	    $tax_rate_meta_data = array_map( 'array_shift', $tax_rate_meta_data );
+
+	    // You shall not pass!
+	    if( empty( $tax_rate_meta_data['wf_tax_rate'] ) )
+		    return;
 
         if( ! in_array( $post->post_name, $tax_rate_classes ) ) {
             $tax_rate_classes[] = $post->post_name;
@@ -162,24 +181,9 @@ class FranchiseTaxRates
             update_option( 'woocommerce_tax_classes', implode( "\n", $tax_rate_classes ) );
         }
 
-        // Extract Post Meta
-        $tax_rate_meta_data = array_intersect_key( $post_meta,
-            [
-                'wf_country'        => 1,
-                'wf_state'          => 1,
-                'wf_tax_rate'       => 1,
-            ]
-        );
-
-        $tax_rate_meta_data = array_map( 'array_shift', $tax_rate_meta_data );
-
-        // You shall not pass!
-        if( empty( $tax_rate_meta_data['wf_tax_rate'] ) )
-            return;
-
         // Build array to sync to DB
         $tax_rate_data = [
-            'tax_rate_country'  => $tax_rate_meta_data['wf_country'],
+            'tax_rate_country'  => ! empty( $tax_rate_meta_data['wf_country'] ) ? $tax_rate_meta_data['wf_country'] : 'US',
             'tax_rate_state'    => $tax_rate_meta_data['wf_state'],
             'tax_rate'          => wc_format_decimal( $tax_rate_meta_data['wf_tax_rate'] ),
             'tax_rate_name'     => $post->post_name,
@@ -198,14 +202,14 @@ class FranchiseTaxRates
         }
 
         // Sync Tax Rate Location Data, zip and city.
-        if ( ! empty( $_POST['wf_zip'] ) ) {
-            $postcode = array_map( 'wc_clean', $_POST['wf_zip'] );
+        if ( ! empty( $tax_rate_meta_data['wf_zip'] ) ) {
+            $postcode = array_map( 'wc_clean', [ $tax_rate_meta_data['wf_zip'] ] );
             $postcode = array_map( 'wc_normalize_postcode', $postcode );
             \WC_Tax::_update_tax_rate_postcodes( $tax_rate_id, $postcode );
         }
 
-        if ( ! empty( $_POST['wf_city'] ) ) {
-            \WC_Tax::_update_tax_rate_cities( $tax_rate_id, array_map( 'wc_clean', $_POST['wf_city'] ) );
+        if ( ! empty( $tax_rate_meta_data['wf_city'] ) ) {
+            \WC_Tax::_update_tax_rate_cities( $tax_rate_id, array_map( 'wc_clean', [ $tax_rate_meta_data['wf_city'] ] ) );
         }
     }
 
