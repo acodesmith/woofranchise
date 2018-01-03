@@ -42,8 +42,6 @@ class FranchiseTaxRates
 
 		    if ( ! empty( $location_id ) ) {
 			    if ( $location = get_post( $location_id ) ) {
-				    error_log( $location->post_name );
-
 				    return $location->post_name;
 			    }
 		    }
@@ -128,7 +126,6 @@ class FranchiseTaxRates
     /**
      * Insert tax class in the WooCommerce tax tables.
      * Update class if it is already set.
-     * Delete tax class if the franchise tax rate is not set.
      *
      * @param $post_id
      */
