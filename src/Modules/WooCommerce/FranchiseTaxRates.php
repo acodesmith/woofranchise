@@ -14,8 +14,6 @@ class FranchiseTaxRates {
 		add_action( 'pmxi_saved_post', [ $this, 'sync_tax_rate' ], 1000, 1 );
 		add_filter( 'wp_trash_post', [ $this, 'delete_synced_tax_rate' ], 10, 1 );
 
-//        add_filter( 'woocommerce_product_get_tax_class', [ $this, 'add_tax' ], 10, 1 );
-//        add_filter( 'woocommerce_product_variation_get_tax_class', [ $this, 'add_tax' ], 10, 1 );
 		add_filter( 'woocommerce_matched_rates', [ $this, 'add_tax' ], 10, 1 );
 		add_filter( 'woocommerce_countries_ex_tax_or_vat', [ $this, 'tax_label' ], 10, 1 );
 		add_filter( 'woocommerce_get_sections_tax', [ $this, 'hide_tax_classes' ], 10, 1 );
@@ -31,6 +29,10 @@ class FranchiseTaxRates {
 	}
 
 	/**
+	 * Main function to add tax rate to order.
+	 * Using the \WC()->session to pull a location_id.
+	 * We then use the location post slug to find the synced tax rate.
+	 *
 	 * @param $matched_tax_rates
 	 *
 	 * @return string
@@ -47,6 +49,10 @@ class FranchiseTaxRates {
 					$tax_rate    = \WC_Tax::_get_tax_rate( $tax_rate_id );
 
 					if ( ! empty( $tax_rate ) ) {
+
+						//Fix tax rate from n/100 value
+						if( (float) $tax_rate['tax_rate'] < 1 )
+							$tax_rate['tax_rate'] *= 100;
 
 						$matched_tax_rates[ $tax_rate_id ] = array(
 							'rate'     => $tax_rate['tax_rate'],
