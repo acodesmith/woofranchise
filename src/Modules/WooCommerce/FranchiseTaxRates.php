@@ -8,6 +8,9 @@ use CaterWaiter\Admin\Order;
 use WooFranchise\Models\Franchise\FranchiseBootstrap;
 
 class FranchiseTaxRates {
+
+	const COUPON_TYPE_TAX_FREE = 'tax_free';
+
 	public function __construct() {
 		add_filter( 'save_post', [ $this, 'sync_tax_rate' ], 1000, 1 );
 		add_filter( 'untrash_post', [ $this, 'sync_tax_rate' ], 1000, 1 );
@@ -17,6 +20,7 @@ class FranchiseTaxRates {
 		add_filter( 'woocommerce_matched_rates', [ $this, 'add_tax' ], 10, 1 );
 		add_filter( 'woocommerce_countries_ex_tax_or_vat', [ $this, 'tax_label' ], 10, 1 );
 		add_filter( 'woocommerce_get_sections_tax', [ $this, 'hide_tax_classes' ], 10, 1 );
+		add_filter( 'woocommerce_coupon_discount_types', [ $this, 'add_tax_free_coupon_type' ]);
 
 		add_filter( 'wp_footer', [ $this, 'tax_label' ] );
 
@@ -29,6 +33,18 @@ class FranchiseTaxRates {
 	}
 
 	/**
+	 * @param array $coupon_types
+	 *
+	 * @return array
+	 */
+	public function add_tax_free_coupon_type($coupon_types) {
+
+		$coupon_types[ self::COUPON_TYPE_TAX_FREE ] = __('Tax Free', 'brumit');
+
+		return $coupon_types;
+	}
+
+	/**
 	 * Main function to add tax rate to order.
 	 * Using the \WC()->session to pull a location_id.
 	 * We then use the location post slug to find the synced tax rate.
@@ -38,7 +54,30 @@ class FranchiseTaxRates {
 	 * @return string
 	 */
 	public function add_tax( $matched_tax_rates ) {
-		if ( \WC()->session ) {
+
+		$coupons = \WC()->session->applied_coupons;
+		$block_taxes = false;
+
+		if( ! empty( $coupons ) )
+			$coupons = array_map(function($coupon_code) {
+
+				$coupon_id = wc_get_coupon_id_by_code($coupon_code);
+
+				if( empty( $coupon_id ) )
+					return false;
+
+				return new \WC_Coupon( $coupon_id );
+			}, $coupons);
+
+		if( ! empty( $coupons ) ) {
+			$coupons = array_filter( $coupons, function($coupon) {
+					return $coupon && $coupon->get_discount_type() === self::COUPON_TYPE_TAX_FREE;
+			});
+
+			$block_taxes = (bool) count( $coupons );
+		}
+
+		if ( \WC()->session && ! $block_taxes ) {
 
 			$location_id = \WC()->session->get( Order::TAX_LOCATION_ID );
 
