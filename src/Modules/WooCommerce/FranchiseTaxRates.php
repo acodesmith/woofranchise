@@ -55,50 +55,53 @@ class FranchiseTaxRates {
 	 */
 	public function add_tax( $matched_tax_rates ) {
 
-		$coupons = \WC()->session->applied_coupons;
-		$block_taxes = false;
+		if( \WC()->session ) {
+			
+			$coupons = \WC()->session->applied_coupons;
+			$block_taxes = false;
 
-		if( ! empty( $coupons ) )
-			$coupons = array_map(function($coupon_code) {
+			if( ! empty( $coupons ) )
+				$coupons = array_map(function($coupon_code) {
 
-				$coupon_id = wc_get_coupon_id_by_code($coupon_code);
+					$coupon_id = wc_get_coupon_id_by_code($coupon_code);
 
-				if( empty( $coupon_id ) )
-					return false;
+					if( empty( $coupon_id ) )
+						return false;
 
-				return new \WC_Coupon( $coupon_id );
-			}, $coupons);
+					return new \WC_Coupon( $coupon_id );
+				}, $coupons);
 
-		if( ! empty( $coupons ) ) {
-			$coupons = array_filter( $coupons, function($coupon) {
-					return $coupon && $coupon->get_discount_type() === self::COUPON_TYPE_TAX_FREE;
-			});
+			if( ! empty( $coupons ) ) {
+				$coupons = array_filter( $coupons, function($coupon) {
+						return $coupon && $coupon->get_discount_type() === self::COUPON_TYPE_TAX_FREE;
+				});
 
-			$block_taxes = (bool) count( $coupons );
-		}
+				$block_taxes = (bool) count( $coupons );
+			}
 
-		if ( \WC()->session && ! $block_taxes ) {
+			if ( \WC()->session && ! $block_taxes ) {
 
-			$location_id = \WC()->session->get( Order::TAX_LOCATION_ID );
+				$location_id = \WC()->session->get( Order::TAX_LOCATION_ID );
 
-			if ( ! empty( $location_id ) ) {
-				if ( $location = get_post( $location_id ) ) {
+				if ( ! empty( $location_id ) ) {
+					if ( $location = get_post( $location_id ) ) {
 
-					$tax_rate_id = self::get_tax_rate_by_name( $location->post_name );
-					$tax_rate    = \WC_Tax::_get_tax_rate( $tax_rate_id );
+						$tax_rate_id = self::get_tax_rate_by_name( $location->post_name );
+						$tax_rate    = \WC_Tax::_get_tax_rate( $tax_rate_id );
 
-					if ( ! empty( $tax_rate ) ) {
+						if ( ! empty( $tax_rate ) ) {
 
-						//Fix tax rate from n/100 value
-						if( (float) $tax_rate['tax_rate'] < 1 )
-							$tax_rate['tax_rate'] *= 100;
+							//Fix tax rate from n/100 value
+							if( (float) $tax_rate['tax_rate'] < 1 )
+								$tax_rate['tax_rate'] *= 100;
 
-						$matched_tax_rates[ $tax_rate_id ] = array(
-							'rate'     => $tax_rate['tax_rate'],
-							'label'    => __( 'Tax', 'cater_waiter' ),
-							'shipping' => 'no',
-							'compound' => 'no',
-						);
+							$matched_tax_rates[ $tax_rate_id ] = array(
+								'rate'     => $tax_rate['tax_rate'],
+								'label'    => __( 'Tax', 'cater_waiter' ),
+								'shipping' => 'no',
+								'compound' => 'no',
+							);
+						}
 					}
 				}
 			}
