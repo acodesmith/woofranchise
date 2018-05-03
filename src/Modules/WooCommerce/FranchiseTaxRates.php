@@ -88,7 +88,7 @@ class FranchiseTaxRates {
 
 						$tax_rate_id = self::get_tax_rate_by_name( $location->post_name );
 						$tax_rate    = \WC_Tax::_get_tax_rate( $tax_rate_id );
-
+						
 						if ( ! empty( $tax_rate ) ) {
 
 							//Fix tax rate from n/100 value
