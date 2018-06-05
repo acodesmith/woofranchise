@@ -11,8 +11,8 @@ class FranchiseOrderEmails {
 
 	public function __construct() {
 
-		add_action( 'woocommerce_email_headers', [ $this, 'store_email' ], 10, 2 );
-		add_action( 'woocommerce_email_headers', [ $this, 'district_manager_email' ], 10, 2 );
+		add_filter( 'woocommerce_email_headers', [ $this, 'store_email' ], 10, 2 );
+		add_filter( 'woocommerce_email_headers', [ $this, 'district_manager_email' ], 10, 2 );
 	}
 
 	/**
