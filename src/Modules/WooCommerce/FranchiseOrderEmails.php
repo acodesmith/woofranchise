@@ -11,8 +11,8 @@ class FranchiseOrderEmails {
 
 	public function __construct() {
 
-		add_filter( 'woocommerce_email_headers', [ $this, 'store_email' ], 10, 2 );
-		add_filter( 'woocommerce_email_headers', [ $this, 'district_manager_email' ], 10, 2 );
+		add_filter( 'woocommerce_email_headers', [ $this, 'store_email' ], 10, 3 );
+		add_filter( 'woocommerce_email_headers', [ $this, 'district_manager_email' ], 10, 3 );
 	}
 
 	/**
@@ -62,12 +62,14 @@ class FranchiseOrderEmails {
 	 * Add the email address as a BCC.
 	 *
 	 * @param $headers
-	 * @param $order_id
+	 * @param $email_id
+	 * @param \WC_Order $order
 	 *
 	 * @return string
 	 */
-	public function store_email( $headers, $order_id ) {
+	public function store_email( $headers, $email_id, $order ) {
 
+		$order_id = $order->get_id();
 		$order = wc_get_order( $order_id );
 
 		if ( ! $order ) {
@@ -93,12 +95,14 @@ class FranchiseOrderEmails {
 	 * Add the email address as a BCC.
 	 *
 	 * @param $headers
-	 * @param $order_id
+	 * @param $email_id
+	 * @param \WC_Order $order
 	 *
 	 * @return mixed|string
 	 */
-	public function district_manager_email( $headers, $order_id ) {
+	public function district_manager_email( $headers, $email_id, $order ) {
 
+		$order_id = $order->get_id();
 		$order = wc_get_order( $order_id );
 
 		if ( ! $order ) {
