@@ -69,26 +69,16 @@ class FranchiseOrderEmails {
 	 */
 	public function store_email( $headers, $email_id, $order ) {
 
-		$order_id = $order->get_id();
-		$order = wc_get_order( $order_id );
-
-		if ( ! $order ) {
+		if ( ! self::validate_order_status($order->get_status()) ) {
 			return $headers;
 		}
 
-		if ( 'completed' !== $order->get_status() ) {
-			return $headers;
-		}
-
-		$wf_store_email = self::valid_order_location_post_meta($order_id, 'wf_store_email');
-
-		var_dump($wf_store_email);
+		$wf_store_email = self::valid_order_location_post_meta($order->get_id(), 'wf_store_email');
 
 		// Add Store Email as BCC
 		if( ! empty( $wf_store_email ) )
 			$headers = self::add_bcc( $headers, $wf_store_email );
 
-		var_dump($headers);die;
 		return $headers;
 	}
 
@@ -105,23 +95,25 @@ class FranchiseOrderEmails {
 	 */
 	public function district_manager_email( $headers, $email_id, $order ) {
 
-		$order_id = $order->get_id();
-		$order = wc_get_order( $order_id );
-
-		if ( ! $order ) {
+		if ( ! self::validate_order_status($order->get_status()) ) {
 			return $headers;
 		}
 
-		if ( 'completed' !== $order->get_status() ) {
-			return $headers;
-		}
-
-		$wf_district_manager_email = self::valid_order_location_post_meta($order_id, 'wf_district_manager_email');
+		$wf_district_manager_email = self::valid_order_location_post_meta($order->get_id(), 'wf_district_manager_email');
 
 		// Add District Manager Email as BCC
 		if( ! empty( $wf_district_manager_email ) )
 			$headers = self::add_bcc( $headers, $wf_district_manager_email );
 
 		return $headers;
+	}
+
+	/**
+	 * @param $status
+	 *
+	 * @return bool
+	 */
+	public static function validate_order_status($status) {
+		return ! in_array($status, [ 'refunded', 'cancelled', 'on-hold', 'failed' ]);
 	}
 }
