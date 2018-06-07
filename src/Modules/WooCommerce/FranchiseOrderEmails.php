@@ -11,8 +11,8 @@ class FranchiseOrderEmails {
 
 	public function __construct() {
 
-		add_filter( 'woocommerce_email_headers', [ $this, 'store_email' ], 10000, 3 );
-		add_filter( 'woocommerce_email_headers', [ $this, 'district_manager_email' ], 100000, 3 );
+		add_action( 'woocommerce_email_headers', [ $this, 'store_email' ], 10, 3 );
+		add_action( 'woocommerce_email_headers', [ $this, 'district_manager_email' ], 10, 3 );
 	}
 
 	/**
@@ -82,10 +82,13 @@ class FranchiseOrderEmails {
 
 		$wf_store_email = self::valid_order_location_post_meta($order_id, 'wf_store_email');
 
+		var_dump($wf_store_email);
+
 		// Add Store Email as BCC
 		if( ! empty( $wf_store_email ) )
 			$headers = self::add_bcc( $headers, $wf_store_email );
 
+		var_dump($headers);die;
 		return $headers;
 	}
 

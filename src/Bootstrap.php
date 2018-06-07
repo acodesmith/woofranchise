@@ -27,7 +27,6 @@ class Bootstrap
     public function run()
     {
         if ( ! class_exists( 'WooCommerce' ) ) {
-            //@todo add admin error
             return;
         }
 
