@@ -11,8 +11,8 @@ class FranchiseOrderEmails {
 
 	public function __construct() {
 
-		add_filter( 'woocommerce_email_headers', [ $this, 'store_email' ], 10, 3 );
-		add_filter( 'woocommerce_email_headers', [ $this, 'district_manager_email' ], 10, 3 );
+		add_filter( 'woocommerce_email_headers', [ $this, 'store_email' ], 10000, 3 );
+		add_filter( 'woocommerce_email_headers', [ $this, 'district_manager_email' ], 100000, 3 );
 	}
 
 	/**
@@ -45,12 +45,12 @@ class FranchiseOrderEmails {
 	 */
 	public function add_bcc($headers, $email) {
 
-		$pos = strpos( $headers, 'BCC: ' );
+		$pos = strpos( $headers, 'Bcc: ' );
 
 		if( false === $pos )
-			$headers .= "BCC: <$email>\r\n";
+			$headers .= "Bcc: $email\r\n";
 		else{
-			$headers = str_replace( 'BCC: ', "BCC: <$email>, ", $headers );
+			$headers = str_replace( 'Bcc: ', "Bcc: $email, ", $headers );
 		}
 
 		return $headers;
