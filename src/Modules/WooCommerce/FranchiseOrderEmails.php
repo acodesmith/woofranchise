@@ -43,14 +43,14 @@ class FranchiseOrderEmails {
 	 *
 	 * @return mixed|string
 	 */
-	public function add_bcc($headers, $email) {
+	public function add_cc($headers, $email) {
 
-		$pos = strpos( $headers, 'Bcc: ' );
+		$pos = strpos( $headers, 'Cc: ' );
 
 		if( false === $pos )
-			$headers .= "Bcc: $email\r\n";
+			$headers .= "Cc: $email\r\n";
 		else{
-			$headers = str_replace( 'Bcc: ', "Bcc: $email, ", $headers );
+			$headers = str_replace( 'Cc: ', "Cc: $email, ", $headers );
 		}
 
 		return $headers;
@@ -77,7 +77,7 @@ class FranchiseOrderEmails {
 
 		// Add Store Email as BCC
 		if( ! empty( $wf_store_email ) )
-			$headers = self::add_bcc( $headers, $wf_store_email );
+			$headers = self::add_cc( $headers, $wf_store_email );
 
 		return $headers;
 	}
@@ -103,7 +103,7 @@ class FranchiseOrderEmails {
 
 		// Add District Manager Email as BCC
 		if( ! empty( $wf_district_manager_email ) )
-			$headers = self::add_bcc( $headers, $wf_district_manager_email );
+			$headers = self::add_cc( $headers, $wf_district_manager_email );
 
 		return $headers;
 	}
